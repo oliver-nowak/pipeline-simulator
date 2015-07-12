@@ -21,6 +21,9 @@ const (
 var Main_Mem = make([]byte, MAX_MEMORY)
 var Regs = make([]int, MAX_REGS)
 
+///////////////////
+// Instructions //
+/////////////////
 var instructions = []int{
 	0xa1020000,
 	0x810AFFFC,
@@ -35,34 +38,6 @@ var instructions = []int{
 	0x00000000,
 	0x00000000}
 
-// var instructions = []int{
-// 	0x022DA822, // sub
-// 	0x8EF30018, // lw
-// 	0x12A70004, // beq
-// 	0x02689820,
-// 	0xAD930018,
-// 	0x02697824,
-// 	0xAD8FFFF4,
-// 	0x018C6020,
-// 	0x02A4A825,
-// 	0x158FFFF6,
-// 	0x8E59FFF0}
-
-// var func_codes = map[int]string{
-// 	0x20: "add",
-// 	0x22: "sub",
-// 	0x24: "and",
-// 	0x25: "or",
-// 	0x2A: "slt"}
-
-// var op_codes = map[int]string{
-// 	0x04: "beq",
-// 	0x05: "bne",
-// 	0x23: "lw",
-// 	0x2B: "sw"}
-
-// var pc int = 0x7A05C
-
 var func_codes = map[int]string{
 	0x0:  "nop",
 	0x20: "add",
@@ -75,12 +50,91 @@ var op_codes = map[int]string{
 type R_Inst struct {
 	instruction       int
 	funct, rd, rs, rt int
+	code              string
 }
 
 type I_Inst struct {
 	instruction int
 	op, rt, rs  int
 	offset      int16
+	code        string
+}
+
+type Control struct {
+	RegDst   bool
+	ALUSrc   bool
+	ALUOp    bool
+	MemRead  bool
+	MemWrite bool
+	Branch   bool
+	MemToReg bool
+	RegWrite bool
+}
+
+type IF_ID_Write struct {
+	Instruction int
+	Code        string
+	Incr_PC     int
+}
+
+type IF_ID_Read struct {
+	Instruction int
+	Code        string
+	Incr_PC     int
+}
+
+type ID_EX_Write struct {
+	Control        Control
+	Incr_PC        int
+	ReadReg1Value  int
+	ReadReg2Value  int
+	SEOffset       int
+	WriteReg_20_16 int
+	WriteReg_15_11 int
+	Function       int
+}
+
+type ID_EX_Read struct {
+	Control        Control
+	Incr_PC        int
+	ReadReg1Value  int
+	ReadReg2Value  int
+	SEOffset       int
+	WriteReg_20_16 int
+	WriteReg_15_11 int
+	Function       int
+}
+
+type EX_MEM_Write struct {
+	Control     Control
+	CalcBTA     int
+	Zero        bool
+	ALUResult   int
+	SWValue     int
+	WriteRegNum int
+}
+
+type EX_MEM_Read struct {
+	Control     Control
+	CalcBTA     int
+	Zero        bool
+	ALUResult   int
+	SWValue     int
+	WriteRegNum int
+}
+
+type MEM_WB_Write struct {
+	Control     Control
+	LWDataValue int
+	ALUResult   int
+	WriteRegNum int
+}
+
+type MEM_WB_Read struct {
+	Control     Control
+	LWDataValue int
+	ALUResult   int
+	WriteRegNum int
 }
 
 func main() {
@@ -91,13 +145,15 @@ func main() {
 	fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
 	fmt.Printf("Registers: [%X]\n", Regs)
 
-	IF_stage()
-
-	// num_instructions := len(instructions)
-
-	// for num_instructions >= 0 {
-
-	// }
+	for pc, instruction := range instructions {
+		IF_stage(pc, instruction)
+		ID_stage()
+		EX_stage()
+		MEM_stage()
+		WB_stage()
+		Print_out_everything()
+		Copy_write_to_read()
+	}
 }
 
 func Initialize_Memory() {
@@ -116,20 +172,14 @@ func Initialize_Registers() {
 	}
 }
 
-func IF_stage() {
+func IF_stage(pc int, instruction int) {
 	showVerbose := false
 
-	for _, instruction := range instructions {
-
-		// increment pc
-		// pc = pc + 0x4
-
-		// handle opcode format
-		if ((instruction & OPCODE_MASK) >> 26) == RFORMAT {
-			Do_RFormat(instruction, showVerbose)
-		} else {
-			Do_IFormat(instruction, showVerbose)
-		}
+	// handle opcode format
+	if ((instruction & OPCODE_MASK) >> 26) == RFORMAT {
+		Do_RFormat(instruction, showVerbose)
+	} else {
+		Do_IFormat(instruction, showVerbose)
 	}
 }
 
