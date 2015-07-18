@@ -48,8 +48,17 @@ var instructions = []int{
 // 	0x00000000,
 // 	0x00000000}
 
+////////////////////////
+// Pipeline Registers //
+///////////////////////
 var ifid_w = new(IF_ID_Write)
 var ifid_r = new(IF_ID_Read)
+var id_ex_w = new(ID_EX_Write)
+var id_ex_r = new(ID_EX_Read)
+var ex_mem_w = new(EX_MEM_Write)
+var ex_mem_r = new(EX_MEM_Read)
+var mem_wb_w = new(MEM_WB_Write)
+var mem_wb_r = new(MEM_WB_Read)
 
 // TODO: remove inst codes not requested by assignment parameters
 var func_codes = map[int]string{
@@ -124,11 +133,11 @@ type ID_EX_Base struct {
 }
 
 type ID_EX_Write struct {
-	ID_EX_Base
+	ID_EX_Base // anonymous base type
 }
 
 type ID_EX_Read struct {
-	ID_EX_Base
+	ID_EX_Base // anonymous base type
 }
 
 func (r *ID_EX_Base) dump_ID_EX() {
@@ -161,11 +170,11 @@ type EX_MEM_Base struct {
 }
 
 type EX_MEM_Write struct {
-	EX_MEM_Base
+	EX_MEM_Base // anonymous base type
 }
 
 type EX_MEM_Read struct {
-	EX_MEM_Base
+	EX_MEM_Base // anonymous base type
 }
 
 func (r *EX_MEM_Base) dump_EX_MEM() {
@@ -192,11 +201,11 @@ type MEM_WB_Base struct {
 }
 
 type MEM_WB_Write struct {
-	MEM_WB_Base
+	MEM_WB_Base // anonymous base type
 }
 
 type MEM_WB_Read struct {
-	MEM_WB_Base
+	MEM_WB_Base // anonymous base type
 }
 
 func (r *MEM_WB_Base) dump_MEM_WB() {
@@ -256,6 +265,15 @@ func Initialize_Registers() {
 func Initialize_Pipeline() {
 	ifid_w.Reg_Type = "Write"
 	ifid_r.Reg_Type = "Read"
+
+	id_ex_w.Reg_Type = "Write"
+	id_ex_r.Reg_Type = "Read"
+
+	ex_mem_w.Reg_Type = "Write"
+	ex_mem_r.Reg_Type = "Read"
+
+	mem_wb_w.Reg_Type = "Write"
+	mem_wb_r.Reg_Type = "Read"
 }
 
 func IF_stage() {
@@ -278,9 +296,44 @@ func ID_stage() {
 	// handle opcode format
 	if ((instruction & OPCODE_MASK) >> 26) == RFORMAT {
 		decoded_inst := Do_RFormat(instruction, showVerbose)
+		fmt.Sprintf(decoded_inst.inst_string)
 
+		id_ex_w.Incr_PC = ifid_r.Incr_PC
+		id_ex_w.RegDst = false
+		id_ex_w.ALUSrc = false
+		id_ex_w.ALUOp = false
+		id_ex_w.MemRead = false
+		id_ex_w.MemWrite = false
+		id_ex_w.Branch = false
+		id_ex_w.MemToReg = false
+		id_ex_w.RegWrite = false
+		id_ex_w.Instr_String = "ERROR"
+		id_ex_w.ReadReg1Value = 0
+		id_ex_w.ReadReg2Value = 0
+		id_ex_w.SEOffset = 0
+		id_ex_w.WriteReg_20_16 = 0
+		id_ex_w.WriteReg_15_11 = 0
+		id_ex_w.Function = 0
 	} else {
 		decoded_inst := Do_IFormat(instruction, showVerbose)
+		fmt.Sprintf(decoded_inst.inst_string)
+
+		id_ex_w.Incr_PC = ifid_r.Incr_PC
+		id_ex_w.RegDst = false
+		id_ex_w.ALUSrc = false
+		id_ex_w.ALUOp = false
+		id_ex_w.MemRead = false
+		id_ex_w.MemWrite = false
+		id_ex_w.Branch = false
+		id_ex_w.MemToReg = false
+		id_ex_w.RegWrite = false
+		id_ex_w.Instr_String = "ERROR"
+		id_ex_w.ReadReg1Value = 0
+		id_ex_w.ReadReg2Value = 0
+		id_ex_w.SEOffset = 0
+		id_ex_w.WriteReg_20_16 = 0
+		id_ex_w.WriteReg_15_11 = 0
+		id_ex_w.Function = 0
 	}
 }
 
@@ -313,12 +366,58 @@ func Print_out_everything(isAfterCopy bool) {
 
 func Copy_write_to_read() {
 	CopyIFID()
+	CopyIDEX()
+	CopyEXMEM()
+	CopyMEMWB()
 }
 
 func CopyIFID() {
 	ifid_r.Instruction = ifid_w.Instruction
-	ifid_r.Incr_PC = ifid_r.Incr_PC
+	ifid_r.Incr_PC = ifid_w.Incr_PC
 }
+
+func CopyIDEX() {
+	id_ex_r.RegDst = id_ex_w.RegDst
+	id_ex_r.ALUSrc = id_ex_w.ALUSrc
+	id_ex_r.ALUOp = id_ex_w.ALUOp
+	id_ex_r.MemRead = id_ex_w.MemRead
+	id_ex_r.MemWrite = id_ex_w.MemWrite
+	id_ex_r.Branch = id_ex_w.Branch
+	id_ex_r.MemToReg = id_ex_w.MemToReg
+	id_ex_r.RegWrite = id_ex_w.RegWrite
+	id_ex_r.Incr_PC = id_ex_w.Incr_PC
+	id_ex_r.ReadReg1Value = id_ex_w.ReadReg1Value
+	id_ex_r.ReadReg2Value = id_ex_w.ReadReg2Value
+	id_ex_r.SEOffset = id_ex_w.SEOffset
+	id_ex_r.WriteReg_20_16 = id_ex_w.WriteReg_20_16
+	id_ex_r.WriteReg_15_11 = id_ex_w.WriteReg_15_11
+	id_ex_r.Function = id_ex_w.Function
+	id_ex_r.Instr_String = id_ex_w.Instr_String
+}
+
+func CopyEXMEM() {
+	ex_mem_r.MemRead = ex_mem_w.MemRead
+	ex_mem_r.MemWrite = ex_mem_w.MemWrite
+	ex_mem_r.Branch = ex_mem_w.Branch
+	ex_mem_r.MemToReg = ex_mem_w.MemToReg
+	ex_mem_r.RegWrite = ex_mem_w.RegWrite
+	ex_mem_r.CalcBTA = ex_mem_w.CalcBTA
+	ex_mem_r.Zero = ex_mem_w.Zero
+	ex_mem_r.ALUResult = ex_mem_w.ALUResult
+	ex_mem_r.SWValue = ex_mem_w.SWValue
+	ex_mem_r.WriteRegNum = ex_mem_w.WriteRegNum
+	ex_mem_r.Instr_String = ex_mem_w.Instr_String
+}
+
+func CopyMEMWB() {
+	mem_wb_r.MemToReg = mem_wb_w.MemToReg
+	mem_wb_r.RegWrite = mem_wb_w.RegWrite
+	mem_wb_r.LWDataValue = mem_wb_w.LWDataValue
+	mem_wb_r.ALUResult = mem_wb_w.ALUResult
+	mem_wb_r.WriteRegNum = mem_wb_w.WriteRegNum
+	mem_wb_r.Instr_String = mem_wb_w.Instr_String
+}
+
 func Do_RFormat(instruction int, showVerbose bool) *R_Inst {
 	opcode := (instruction & OPCODE_MASK) >> 26
 	rs := (instruction & RS_MASK) >> 21
