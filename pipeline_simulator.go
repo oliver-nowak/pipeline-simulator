@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	// "log"
 )
 
 const (
@@ -16,13 +17,15 @@ const (
 	RD_MASK          int = 0x0000F800 // >> 11
 	FUNC_MASK        int = 0x0000003F // >> 00
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
-	MAX_CLOCK_CYCLES int = 8
+	REG_20_16_MASK   int = 0x001F0000 // >> 16
+	REG_15_11_MASK   int = 0x0000F800 // >> 11
+	MAX_CLOCK_CYCLES int = 3
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
 var Regs = make([]int, MAX_REGS)
 var clock_cyle = 0
-var pc = 0
+var pc = -1
 
 ///////////////////
 // Instructions //
@@ -72,6 +75,19 @@ var op_codes = map[int]string{
 	0x23: "lw",
 	0x28: "sb",
 	0x2b: "sw"}
+
+// TODO: do i need this ???
+var alu_control_lines = map[string]int{
+	"lw":  2,
+	"sw":  2,
+	"lb":  2,
+	"sb":  2,
+	"and": 0,
+	"or":  1,
+	"add": 2,
+	"sub": 6,
+	"slt": 7,
+	"nor": 12}
 
 type Base_Inst struct {
 	instruction int
@@ -147,12 +163,12 @@ func (r *ID_EX_Base) dump_ID_EX() {
 	fmt.Println("------------")
 
 	fmt.Printf("Control: \n")
-	fmt.Printf("RegDst=%d, ALUSrc=%d, ALUOp=%d \n", r.RegDst, r.ALUSrc, r.ALUOp)
+	fmt.Printf("RegDst=%d, ALUSrc=%d, ALUOp=%b \n", r.RegDst, r.ALUSrc, r.ALUOp)
 	fmt.Printf("MemRead=%d, MemWrite=%d, Branch=%d \n", r.MemRead, r.MemWrite, r.Branch)
 	fmt.Printf("MemToReg=%d, RegWrite=%d, [%s] \n", r.MemToReg, r.RegWrite, r.Instr_String)
 
 	fmt.Printf("IncrPC= %d  ReadReg1Value=%X  ReadReg2Value=%X \n", r.Incr_PC, r.ReadReg1Value, r.ReadReg2Value)
-	fmt.Printf("SEOffset=%X  WriteReg_20_16=%X  WriteReg_15_11=%X  Function=%d \n", r.SEOffset, r.WriteReg_20_16, r.WriteReg_15_11, r.Function)
+	fmt.Printf("SEOffset=%X  WriteReg_20_16=%X  WriteReg_15_11=%X  Function=%X \n", r.SEOffset, r.WriteReg_20_16, r.WriteReg_15_11, r.Function)
 }
 
 type EX_MEM_Base struct {
@@ -281,15 +297,19 @@ func Initialize_Pipeline() {
 
 func IF_stage() {
 	fetched_inst := NOP
+	pc++
 	// Fetch Instruction
 	if pc < len(instructions) {
 		fetched_inst = instructions[pc]
-		pc++
 	}
 
 	// Copy to IF/ID Write pipeline register
 	ifid_w.Instruction = fetched_inst
 	ifid_w.Incr_PC = pc
+}
+
+func Get_ALU_Control_Input(inst string) int {
+	return alu_control_lines[inst]
 }
 
 func ID_stage() {
@@ -303,30 +323,45 @@ func ID_stage() {
 		decoded_inst := Do_RFormat(instruction, showVerbose)
 		fmt.Sprintf(decoded_inst.inst_string)
 
+		// Set these for R_Instructions
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
-		id_ex_w.RegDst = 0
-		id_ex_w.ALUSrc = 0
-		id_ex_w.ALUOp = 0
+		id_ex_w.ALUOp = 2
+		id_ex_w.Function = decoded_inst.funct
+		id_ex_w.RegDst = 1
+		id_ex_w.RegWrite = 1
+		id_ex_w.Instr_String = func_codes[decoded_inst.funct]
+
+		reg1Value := 0
+		reg2Value := 0
+		if instruction != NOP {
+			reg1Value = Regs[decoded_inst.rs]
+			reg2Value = Regs[decoded_inst.rt]
+		}
+
+		id_ex_w.ReadReg1Value = reg1Value
+		id_ex_w.ReadReg2Value = reg2Value
+
+		id_ex_w.WriteReg_20_16 = (instruction & REG_20_16_MASK) >> 16
+		id_ex_w.WriteReg_15_11 = (instruction & REG_15_11_MASK) >> 11
+
+		// These controls are not set
 		id_ex_w.MemRead = 0
 		id_ex_w.MemWrite = 0
 		id_ex_w.Branch = 0
 		id_ex_w.MemToReg = 0
-		id_ex_w.RegWrite = 0
-		id_ex_w.Instr_String = "ERROR"
-		id_ex_w.ReadReg1Value = 0
-		id_ex_w.ReadReg2Value = 0
 		id_ex_w.SEOffset = 0
-		id_ex_w.WriteReg_20_16 = 0
-		id_ex_w.WriteReg_15_11 = 0
-		id_ex_w.Function = 0
+		id_ex_w.ALUSrc = 0
+
 	} else {
 		decoded_inst := Do_IFormat(instruction, showVerbose)
 		fmt.Sprintf(decoded_inst.inst_string)
 
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
+		id_ex_w.ALUOp = 0 // IFormat instr are 0 for ALUOp
+
+		// NOTE: see page 260 & 266 & 269 in COD for settings for lw/sw
 		id_ex_w.RegDst = 0
 		id_ex_w.ALUSrc = 0
-		id_ex_w.ALUOp = 0
 		id_ex_w.MemRead = 0
 		id_ex_w.MemWrite = 0
 		id_ex_w.Branch = 0
@@ -343,7 +378,38 @@ func ID_stage() {
 }
 
 func EX_stage() {
+	ex_mem_w.MemRead = id_ex_r.MemRead
+	ex_mem_w.MemWrite = id_ex_r.MemWrite
+	ex_mem_w.Branch = id_ex_r.Branch
+	ex_mem_w.MemToReg = id_ex_r.MemToReg
+	ex_mem_w.RegWrite = id_ex_r.RegWrite
+	ex_mem_w.Instr_String = id_ex_r.Instr_String
 
+	// TODO: this needs to be paramaterized
+	// alu_operation_to_perform := alu_control_lines[id_ex_r.Instr_String]
+	result := 0
+	fmt.Printf(">>>>>>> %s", id_ex_r.Instr_String)
+	// TODO: add support for lw / sw / sub
+	if id_ex_r.Instr_String == "add" {
+		result = id_ex_r.ReadReg1Value + id_ex_r.ReadReg2Value
+	} else if id_ex_r.Instr_String == "sub" {
+		result = id_ex_r.ReadReg1Value - id_ex_r.ReadReg2Value
+	} else if id_ex_r.Instr_String == "nop" {
+		result = 0
+	}
+
+	ex_mem_w.ALUResult = result
+
+	if id_ex_r.ALUOp == 2 {
+		ex_mem_w.WriteRegNum = id_ex_r.WriteReg_15_11
+	} else if id_ex_r.ALUOp == 0 {
+		// TODO: double-check this is correct usage of ALUOp
+		ex_mem_w.WriteRegNum = id_ex_r.WriteReg_20_16
+	}
+
+	ex_mem_w.CalcBTA = 0
+	ex_mem_w.Zero = 0                        // TODO: when does this get set?
+	ex_mem_w.SWValue = id_ex_r.ReadReg2Value // TODO: why is this always set to r2?
 }
 
 func MEM_stage() {
@@ -372,8 +438,8 @@ func Print_out_everything(isAfterCopy bool) {
 	ex_mem_w.dump_EX_MEM()
 	ex_mem_r.dump_EX_MEM()
 
-	mem_wb_w.dump_MEM_WB()
-	mem_wb_r.dump_MEM_WB()
+	// mem_wb_w.dump_MEM_WB()
+	// mem_wb_r.dump_MEM_WB()
 
 	fmt.Println("\n         --- END ---          \n")
 }
