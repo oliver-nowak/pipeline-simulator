@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
 const (
@@ -20,23 +19,34 @@ const (
 
 var Main_Mem = make([]byte, MAX_MEMORY)
 var Regs = make([]int, MAX_REGS)
+var clock_cyle = 0
 
 ///////////////////
 // Instructions //
 /////////////////
 var instructions = []int{
-	0xa1020000,
-	0x810AFFFC,
-	0x00831820,
-	0x01263820,
-	0x01224820,
-	0x81180000,
-	0x81510010,
-	0x00624022,
-	0x00000000,
-	0x00000000,
-	0x00000000,
-	0x00000000}
+	0x00a63820}
+
+// 0x8d0f0004,
+// 0xad09fffc,
+// 0x00625022}
+
+// var instructions = []int{
+// 	0xa1020000,
+// 	0x810AFFFC,
+// 	0x00831820,
+// 	0x01263820,
+// 	0x01224820,
+// 	0x81180000,
+// 	0x81510010,
+// 	0x00624022,
+// 	0x00000000,
+// 	0x00000000,
+// 	0x00000000,
+// 	0x00000000}
+
+var ifid_w = new(IF_ID_Write)
+var ifid_r = new(IF_ID_Read)
 
 var func_codes = map[int]string{
 	0x0:  "nop",
@@ -45,12 +55,15 @@ var func_codes = map[int]string{
 
 var op_codes = map[int]string{
 	0x20: "lb",
-	0x28: "sb"}
+	0x23: "lw",
+	0x28: "sb",
+	0x2b: "sw"}
 
 type R_Inst struct {
 	instruction       int
 	funct, rd, rs, rt int
 	code              string
+	inst_string       string
 }
 
 type I_Inst struct {
@@ -58,33 +71,39 @@ type I_Inst struct {
 	op, rt, rs  int
 	offset      int16
 	code        string
+	inst_string string
 }
 
-type Control struct {
-	RegDst   bool
-	ALUSrc   bool
-	ALUOp    bool
-	MemRead  bool
-	MemWrite bool
-	Branch   bool
-	MemToReg bool
-	RegWrite bool
+type IF_ID_Base struct {
+	Instruction int
+	Code        string
+	Incr_PC     int
+	Reg_Type    string
 }
 
 type IF_ID_Write struct {
-	Instruction int
-	Code        string
-	Incr_PC     int
+	IF_ID_Base // anonymous base type
 }
 
 type IF_ID_Read struct {
-	Instruction int
-	Code        string
-	Incr_PC     int
+	IF_ID_Base // anonymous base type
+}
+
+func (r *IF_ID_Base) dump_IF_ID() {
+	fmt.Printf("IF / ID %s \n", r.Reg_Type)
+	fmt.Println("------------")
+	fmt.Printf("Inst = %X     [%s]     IncrPC = %d \n", r.Instruction, r.Code, r.Incr_PC)
 }
 
 type ID_EX_Write struct {
-	Control        Control
+	RegDst         bool
+	ALUSrc         bool
+	ALUOp          bool
+	MemRead        bool
+	MemWrite       bool
+	Branch         bool
+	MemToReg       bool
+	RegWrite       bool
 	Incr_PC        int
 	ReadReg1Value  int
 	ReadReg2Value  int
@@ -95,7 +114,14 @@ type ID_EX_Write struct {
 }
 
 type ID_EX_Read struct {
-	Control        Control
+	RegDst         bool
+	ALUSrc         bool
+	ALUOp          bool
+	MemRead        bool
+	MemWrite       bool
+	Branch         bool
+	MemToReg       bool
+	RegWrite       bool
 	Incr_PC        int
 	ReadReg1Value  int
 	ReadReg2Value  int
@@ -106,7 +132,11 @@ type ID_EX_Read struct {
 }
 
 type EX_MEM_Write struct {
-	Control     Control
+	MemRead     bool
+	MemWrite    bool
+	Branch      bool
+	MemToReg    bool
+	RegWrite    bool
 	CalcBTA     int
 	Zero        bool
 	ALUResult   int
@@ -115,7 +145,11 @@ type EX_MEM_Write struct {
 }
 
 type EX_MEM_Read struct {
-	Control     Control
+	MemRead     bool
+	MemWrite    bool
+	Branch      bool
+	MemToReg    bool
+	RegWrite    bool
 	CalcBTA     int
 	Zero        bool
 	ALUResult   int
@@ -124,14 +158,16 @@ type EX_MEM_Read struct {
 }
 
 type MEM_WB_Write struct {
-	Control     Control
+	MemToReg    bool
+	RegWrite    bool
 	LWDataValue int
 	ALUResult   int
 	WriteRegNum int
 }
 
 type MEM_WB_Read struct {
-	Control     Control
+	MemToReg    bool
+	RegWrite    bool
 	LWDataValue int
 	ALUResult   int
 	WriteRegNum int
@@ -141,9 +177,12 @@ func main() {
 
 	Initialize_Memory()
 	Initialize_Registers()
+	Initialize_Pipeline()
 
 	fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
 	fmt.Printf("Registers: [%X]\n", Regs)
+
+	Print_out_everything()
 
 	for pc, instruction := range instructions {
 		IF_stage(pc, instruction)
@@ -170,6 +209,11 @@ func Initialize_Registers() {
 	for i := range Regs {
 		Regs[i] = 0x100 + i
 	}
+}
+
+func Initialize_Pipeline() {
+	ifid_w.Reg_Type = "Write"
+	ifid_r.Reg_Type = "Read"
 }
 
 func IF_stage(pc int, instruction int) {
@@ -200,7 +244,11 @@ func WB_stage() {
 }
 
 func Print_out_everything() {
+	fmt.Printf("Clock Cycle %d \n", clock_cyle)
+	fmt.Println("------------------------------")
+	ifid_w.dump_IF_ID()
 
+	fmt.Println("         --- END ---          ")
 }
 
 func Copy_write_to_read() {
@@ -226,9 +274,10 @@ func Do_RFormat(instruction int, showVerbose bool) R_Inst {
 		fmt.Println("---END--")
 	}
 
-	fmt.Printf("R_Inst: %3s  $%d,	$%d,	$%d \n", func_code, rd, rs, rt)
+	inst_string := fmt.Sprintf("[%3s  $%d, $%d, $%d]", func_code, rd, rs, rt)
+	fmt.Println(inst_string)
 
-	return R_Inst{instruction: instruction, funct: funct, rd: rd, rs: rs, rt: rt}
+	return R_Inst{instruction: instruction, funct: funct, rd: rd, rs: rs, rt: rt, inst_string: inst_string}
 }
 
 func Do_IFormat(instruction int, showVerbose bool) I_Inst {
@@ -251,12 +300,14 @@ func Do_IFormat(instruction int, showVerbose bool) I_Inst {
 		fmt.Println("---END---")
 	}
 
-	if op == "lb" || op == "sb" {
-		fmt.Printf("I_Inst: %3s  $%d,	%d($%d) \n", op, rt, offset, rs)
-	} else {
-		fmt.Printf("Unknown I_Inst: %3s  $%d,	$%d,	address %X \n", op, rt, rs, offset)
-		log.Fatal("Leaving.")
-	}
+	inst_string := fmt.Sprintf("[%3s  $%d, %d($%d)]", op, rt, offset, rs)
 
-	return I_Inst{instruction: instruction, op: opcode, rt: rt, offset: offset, rs: rs}
+	// if op == "lb" || op == "sb" {
+	fmt.Println(inst_string)
+	// } else {
+	// fmt.Printf("Unknown I_Inst: %3s  $%d,	$%d,	address %X \n", op, rt, rs, offset)
+	// log.Fatal("Leaving.")
+	// }
+
+	return I_Inst{instruction: instruction, op: opcode, rt: rt, offset: offset, rs: rs, inst_string: inst_string}
 }
