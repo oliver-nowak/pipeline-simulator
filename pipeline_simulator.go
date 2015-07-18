@@ -388,7 +388,6 @@ func EX_stage() {
 	// TODO: this needs to be paramaterized
 	// alu_operation_to_perform := alu_control_lines[id_ex_r.Instr_String]
 	result := 0
-	fmt.Printf(">>>>>>> %s", id_ex_r.Instr_String)
 	// TODO: add support for lw / sw / sub
 	if id_ex_r.Instr_String == "add" {
 		result = id_ex_r.ReadReg1Value + id_ex_r.ReadReg2Value
@@ -413,11 +412,18 @@ func EX_stage() {
 }
 
 func MEM_stage() {
-
+	// TODO: handle lb | lw here
+	mem_wb_w.MemToReg = ex_mem_r.MemToReg
+	mem_wb_w.RegWrite = ex_mem_r.RegWrite
+	mem_wb_w.ALUResult = ex_mem_r.ALUResult
+	mem_wb_w.WriteRegNum = ex_mem_r.WriteRegNum
+	mem_wb_w.LWDataValue = 0
 }
 
 func WB_stage() {
-
+	reg_num := mem_wb_r.WriteRegNum
+	reg_val := mem_wb_r.ALUResult
+	Regs[reg_num] = reg_val
 }
 
 func Print_out_everything(isAfterCopy bool) {
@@ -438,8 +444,8 @@ func Print_out_everything(isAfterCopy bool) {
 	ex_mem_w.dump_EX_MEM()
 	ex_mem_r.dump_EX_MEM()
 
-	// mem_wb_w.dump_MEM_WB()
-	// mem_wb_r.dump_MEM_WB()
+	mem_wb_w.dump_MEM_WB()
+	mem_wb_r.dump_MEM_WB()
 
 	fmt.Println("\n         --- END ---          \n")
 }
