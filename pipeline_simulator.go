@@ -5,6 +5,7 @@ import (
 )
 
 const (
+	NOP              int = 0
 	MAX_MEMORY       int = 1024
 	MAX_REGS         int = 32
 	INSTRUCTION_SIZE int = 0x00000004 // in bytes
@@ -15,13 +16,13 @@ const (
 	RD_MASK          int = 0x0000F800 // >> 11
 	FUNC_MASK        int = 0x0000003F // >> 00
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
+	MAX_CLOCK_CYCLES int = 8
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
 var Regs = make([]int, MAX_REGS)
 var clock_cyle = 0
 var pc = 0
-var exit_requested = false
 
 ///////////////////
 // Instructions //
@@ -146,12 +147,12 @@ func (r *ID_EX_Base) dump_ID_EX() {
 	fmt.Println("------------")
 
 	fmt.Printf("Control: \n")
-	fmt.Printf("RegDst=%d, ALUSrc=%d, ALUOp=%d", r.RegDst, r.ALUSrc, r.ALUOp)
-	fmt.Printf("MemRead=%d, MemWrite=%d, Branch=%d", r.MemRead, r.MemWrite, r.Branch)
+	fmt.Printf("RegDst=%d, ALUSrc=%d, ALUOp=%d \n", r.RegDst, r.ALUSrc, r.ALUOp)
+	fmt.Printf("MemRead=%d, MemWrite=%d, Branch=%d \n", r.MemRead, r.MemWrite, r.Branch)
 	fmt.Printf("MemToReg=%d, RegWrite=%d, [%s] \n", r.MemToReg, r.RegWrite, r.Instr_String)
 
-	fmt.Printf("IncrPC= %d  ReadReg1Value=%X  ReadReg2Value=%X", r.Incr_PC, r.ReadReg1Value, r.ReadReg2Value)
-	fmt.Printf("SEOffset=%X  WriteReg_20_16=%X  WriteReg_15_11=%X  Function=%d", r.SEOffset, r.WriteReg_20_16, r.WriteReg_15_11, r.Function)
+	fmt.Printf("IncrPC= %d  ReadReg1Value=%X  ReadReg2Value=%X \n", r.Incr_PC, r.ReadReg1Value, r.ReadReg2Value)
+	fmt.Printf("SEOffset=%X  WriteReg_20_16=%X  WriteReg_15_11=%X  Function=%d \n", r.SEOffset, r.WriteReg_20_16, r.WriteReg_15_11, r.Function)
 }
 
 type EX_MEM_Base struct {
@@ -183,11 +184,11 @@ func (r *EX_MEM_Base) dump_EX_MEM() {
 	fmt.Println("------------")
 
 	fmt.Printf("Control: \n")
-	fmt.Printf("MemRead=%d, MemWrite=%d, Branch=%d", r.MemRead, r.MemWrite, r.Branch)
+	fmt.Printf("MemRead=%d, MemWrite=%d, Branch=%d \n", r.MemRead, r.MemWrite, r.Branch)
 	fmt.Printf("MemToReg=%d, RegWrite=%d, [%s] \n", r.MemToReg, r.RegWrite, r.Instr_String)
 
-	fmt.Printf("CalcBTA=%X  Zero=%b  ALUResult=%X", r.CalcBTA, r.Zero, r.ALUResult)
-	fmt.Printf("SWValue=%X  WriteRegNum=%d", r.SWValue, r.WriteRegNum)
+	fmt.Printf("CalcBTA=%X  Zero=%b  ALUResult=%X \n", r.CalcBTA, r.Zero, r.ALUResult)
+	fmt.Printf("SWValue=%X  WriteRegNum=%d \n", r.SWValue, r.WriteRegNum)
 }
 
 type MEM_WB_Base struct {
@@ -216,7 +217,7 @@ func (r *MEM_WB_Base) dump_MEM_WB() {
 	fmt.Printf("Control: \n")
 	fmt.Printf("MemToReg=%d, RegWrite=%d, [%s] \n", r.MemToReg, r.RegWrite, r.Instr_String)
 
-	fmt.Printf("LWDataValue=%X  ALUResult=%X  WriteRegNum=%d", r.LWDataValue, r.ALUResult, r.WriteRegNum)
+	fmt.Printf("LWDataValue=%X  ALUResult=%X  WriteRegNum=%d \n", r.LWDataValue, r.ALUResult, r.WriteRegNum)
 }
 
 func main() {
@@ -231,7 +232,9 @@ func main() {
 	// dump at Clock-Cycle 0
 	Print_out_everything(false)
 
-	for !exit_requested {
+	for clock_cyle < MAX_CLOCK_CYCLES {
+		clock_cyle++
+
 		IF_stage()
 		ID_stage()
 		EX_stage()
@@ -277,10 +280,12 @@ func Initialize_Pipeline() {
 }
 
 func IF_stage() {
+	fetched_inst := NOP
 	// Fetch Instruction
-	clock_cyle++
-	fetched_inst := instructions[pc]
-	pc++
+	if pc < len(instructions) {
+		fetched_inst = instructions[pc]
+		pc++
+	}
 
 	// Copy to IF/ID Write pipeline register
 	ifid_w.Instruction = fetched_inst
@@ -370,7 +375,7 @@ func Print_out_everything(isAfterCopy bool) {
 	mem_wb_w.dump_MEM_WB()
 	mem_wb_r.dump_MEM_WB()
 
-	fmt.Println("         --- END ---          \n")
+	fmt.Println("\n         --- END ---          \n")
 }
 
 func Copy_write_to_read() {
