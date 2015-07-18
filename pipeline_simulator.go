@@ -59,26 +59,29 @@ var op_codes = map[int]string{
 	0x28: "sb",
 	0x2b: "sw"}
 
+type Base_Inst struct {
+	instruction int
+	inst_string string
+	code        string
+}
+
 type R_Inst struct {
-	instruction       int
+	Base_Inst
 	funct, rd, rs, rt int
-	code              string
-	inst_string       string
 }
 
 type I_Inst struct {
-	instruction int
-	op, rt, rs  int
-	offset      int16
-	code        string
-	inst_string string
+	Base_Inst
+	op, rt, rs int
+	offset     int16
 }
 
 type IF_ID_Base struct {
-	Instruction int
-	Code        string
-	Incr_PC     int
-	Reg_Type    string
+	Instruction        int
+	Code               string
+	Incr_PC            int
+	Reg_Type           string
+	Instruction_String string
 }
 
 type IF_ID_Write struct {
@@ -92,7 +95,7 @@ type IF_ID_Read struct {
 func (r *IF_ID_Base) dump_IF_ID() {
 	fmt.Printf("IF / ID %s \n", r.Reg_Type)
 	fmt.Println("------------")
-	fmt.Printf("Inst = %X     [%s]     IncrPC = %d \n", r.Instruction, r.Code, r.Incr_PC)
+	fmt.Printf("Inst = %.8X     [%s]     IncrPC = %d \n", r.Instruction, r.Instruction_String, r.Incr_PC)
 }
 
 type ID_EX_Write struct {
@@ -179,12 +182,13 @@ func main() {
 	Initialize_Registers()
 	Initialize_Pipeline()
 
-	fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
-	fmt.Printf("Registers: [%X]\n", Regs)
+	// fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
+	// fmt.Printf("Registers: [%X]\n", Regs)
 
 	Print_out_everything()
 
 	for pc, instruction := range instructions {
+		clock_cyle++
 		IF_stage(pc, instruction)
 		ID_stage()
 		EX_stage()
@@ -218,13 +222,16 @@ func Initialize_Pipeline() {
 
 func IF_stage(pc int, instruction int) {
 	showVerbose := false
-
 	// handle opcode format
 	if ((instruction & OPCODE_MASK) >> 26) == RFORMAT {
-		Do_RFormat(instruction, showVerbose)
+		fetched_inst := Do_RFormat(instruction, showVerbose)
+		ifid_w.Instruction = fetched_inst.instruction
+		ifid_w.Incr_PC = pc
+		ifid_w.Instruction_String = fetched_inst.inst_string
 	} else {
-		Do_IFormat(instruction, showVerbose)
+		// fetched_inst := Do_IFormat(instruction, showVerbose)
 	}
+
 }
 
 func ID_stage() {
@@ -255,7 +262,7 @@ func Copy_write_to_read() {
 
 }
 
-func Do_RFormat(instruction int, showVerbose bool) R_Inst {
+func Do_RFormat(instruction int, showVerbose bool) *R_Inst {
 	opcode := (instruction & OPCODE_MASK) >> 26
 	rs := (instruction & RS_MASK) >> 21
 	rt := (instruction & RT_MASK) >> 16
@@ -275,12 +282,20 @@ func Do_RFormat(instruction int, showVerbose bool) R_Inst {
 	}
 
 	inst_string := fmt.Sprintf("[%3s  $%d, $%d, $%d]", func_code, rd, rs, rt)
-	fmt.Println(inst_string)
+	// fmt.Println(inst_string)
 
-	return R_Inst{instruction: instruction, funct: funct, rd: rd, rs: rs, rt: rt, inst_string: inst_string}
+	r := new(R_Inst)
+	r.instruction = instruction
+	r.funct = funct
+	r.rd = rd
+	r.rs = rs
+	r.rt = rt
+	r.inst_string = inst_string
+
+	return r
 }
 
-func Do_IFormat(instruction int, showVerbose bool) I_Inst {
+func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 	opcode := (instruction & OPCODE_MASK) >> 26
 	op := op_codes[opcode]
 	rs := (instruction & RS_MASK) >> 21
@@ -303,11 +318,19 @@ func Do_IFormat(instruction int, showVerbose bool) I_Inst {
 	inst_string := fmt.Sprintf("[%3s  $%d, %d($%d)]", op, rt, offset, rs)
 
 	// if op == "lb" || op == "sb" {
-	fmt.Println(inst_string)
+	// fmt.Println(inst_string)
 	// } else {
 	// fmt.Printf("Unknown I_Inst: %3s  $%d,	$%d,	address %X \n", op, rt, rs, offset)
 	// log.Fatal("Leaving.")
 	// }
 
-	return I_Inst{instruction: instruction, op: opcode, rt: rt, offset: offset, rs: rs, inst_string: inst_string}
+	i := new(I_Inst)
+	i.instruction = instruction
+	i.op = opcode
+	i.rt = rt
+	i.offset = offset
+	i.rs = rs
+	i.inst_string = inst_string
+
+	return i
 }
