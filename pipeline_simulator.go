@@ -19,7 +19,7 @@ const (
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
 	REG_20_16_MASK   int = 0x001F0000 // >> 16
 	REG_15_11_MASK   int = 0x0000F800 // >> 11
-	MAX_CLOCK_CYCLES int = 3
+	MAX_CLOCK_CYCLES int = 5
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
@@ -420,6 +420,7 @@ func MEM_stage() {
 	mem_wb_w.RegWrite = ex_mem_r.RegWrite
 	mem_wb_w.ALUResult = ex_mem_r.ALUResult
 	mem_wb_w.WriteRegNum = ex_mem_r.WriteRegNum
+	mem_wb_w.Instr_String = ex_mem_r.Instr_String
 	mem_wb_w.LWDataValue = 0
 }
 
@@ -582,9 +583,10 @@ func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 }
 
 func Dump_Memory() {
+	// TODO: dump all memory ?
 	fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
 }
 
 func Dump_Registers() {
-	fmt.Printf("Registers: [%X]\n", Regs)
+	fmt.Printf("Registers: %X\n", Regs)
 }
