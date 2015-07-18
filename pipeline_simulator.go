@@ -113,14 +113,14 @@ func (r *IF_ID_Base) dump_IF_ID() {
 }
 
 type ID_EX_Base struct {
-	RegDst         bool
-	ALUSrc         bool
-	ALUOp          bool
-	MemRead        bool
-	MemWrite       bool
-	Branch         bool
-	MemToReg       bool
-	RegWrite       bool
+	RegDst         int
+	ALUSrc         int
+	ALUOp          int
+	MemRead        int
+	MemWrite       int
+	Branch         int
+	MemToReg       int
+	RegWrite       int
 	Incr_PC        int
 	ReadReg1Value  int
 	ReadReg2Value  int
@@ -155,13 +155,13 @@ func (r *ID_EX_Base) dump_ID_EX() {
 }
 
 type EX_MEM_Base struct {
-	MemRead      bool
-	MemWrite     bool
-	Branch       bool
-	MemToReg     bool
-	RegWrite     bool
+	MemRead      int
+	MemWrite     int
+	Branch       int
+	MemToReg     int
+	RegWrite     int
 	CalcBTA      int
-	Zero         bool
+	Zero         int
 	ALUResult    int
 	SWValue      int
 	WriteRegNum  int
@@ -191,8 +191,8 @@ func (r *EX_MEM_Base) dump_EX_MEM() {
 }
 
 type MEM_WB_Base struct {
-	MemToReg     bool
-	RegWrite     bool
+	MemToReg     int
+	RegWrite     int
 	LWDataValue  int
 	ALUResult    int
 	WriteRegNum  int
@@ -299,14 +299,14 @@ func ID_stage() {
 		fmt.Sprintf(decoded_inst.inst_string)
 
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
-		id_ex_w.RegDst = false
-		id_ex_w.ALUSrc = false
-		id_ex_w.ALUOp = false
-		id_ex_w.MemRead = false
-		id_ex_w.MemWrite = false
-		id_ex_w.Branch = false
-		id_ex_w.MemToReg = false
-		id_ex_w.RegWrite = false
+		id_ex_w.RegDst = 0
+		id_ex_w.ALUSrc = 0
+		id_ex_w.ALUOp = 0
+		id_ex_w.MemRead = 0
+		id_ex_w.MemWrite = 0
+		id_ex_w.Branch = 0
+		id_ex_w.MemToReg = 0
+		id_ex_w.RegWrite = 0
 		id_ex_w.Instr_String = "ERROR"
 		id_ex_w.ReadReg1Value = 0
 		id_ex_w.ReadReg2Value = 0
@@ -319,14 +319,14 @@ func ID_stage() {
 		fmt.Sprintf(decoded_inst.inst_string)
 
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
-		id_ex_w.RegDst = false
-		id_ex_w.ALUSrc = false
-		id_ex_w.ALUOp = false
-		id_ex_w.MemRead = false
-		id_ex_w.MemWrite = false
-		id_ex_w.Branch = false
-		id_ex_w.MemToReg = false
-		id_ex_w.RegWrite = false
+		id_ex_w.RegDst = 0
+		id_ex_w.ALUSrc = 0
+		id_ex_w.ALUOp = 0
+		id_ex_w.MemRead = 0
+		id_ex_w.MemWrite = 0
+		id_ex_w.Branch = 0
+		id_ex_w.MemToReg = 0
+		id_ex_w.RegWrite = 0
 		id_ex_w.Instr_String = "ERROR"
 		id_ex_w.ReadReg1Value = 0
 		id_ex_w.ReadReg2Value = 0
@@ -360,6 +360,15 @@ func Print_out_everything(isAfterCopy bool) {
 	fmt.Println("------------------------------")
 	ifid_w.dump_IF_ID()
 	ifid_r.dump_IF_ID()
+
+	id_ex_w.dump_ID_EX()
+	id_ex_r.dump_ID_EX()
+
+	ex_mem_w.dump_EX_MEM()
+	ex_mem_r.dump_EX_MEM()
+
+	mem_wb_w.dump_MEM_WB()
+	mem_wb_r.dump_MEM_WB()
 
 	fmt.Println("         --- END ---          \n")
 }
