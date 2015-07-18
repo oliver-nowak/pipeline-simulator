@@ -242,8 +242,8 @@ func main() {
 	Initialize_Registers()
 	Initialize_Pipeline()
 
-	// fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
-	// fmt.Printf("Registers: [%X]\n", Regs)
+	Dump_Memory()
+	Dump_Registers()
 
 	// dump at Clock-Cycle 0
 	Print_out_everything(false)
@@ -263,6 +263,9 @@ func main() {
 		// TODO: remove this call, and remove param from signature
 		Print_out_everything(true)
 	}
+
+	Dump_Memory()
+	Dump_Registers()
 }
 
 func Initialize_Memory() {
@@ -576,4 +579,12 @@ func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 	i.inst_string = inst_string
 
 	return i
+}
+
+func Dump_Memory() {
+	fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
+}
+
+func Dump_Registers() {
+	fmt.Printf("Registers: [%X]\n", Regs)
 }
