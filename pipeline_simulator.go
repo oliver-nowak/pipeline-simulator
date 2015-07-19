@@ -19,7 +19,7 @@ const (
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
 	REG_20_16_MASK   int = 0x001F0000 // >> 16
 	REG_15_11_MASK   int = 0x0000F800 // >> 11
-	MAX_CLOCK_CYCLES int = 2
+	MAX_CLOCK_CYCLES int = 6
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
@@ -31,11 +31,9 @@ var pc = -1
 // Instructions //
 /////////////////
 var instructions = []int{
-	// 0x00a63820,
-	// 0x8d0f0004,
-	0xad09fffc}
-
-// 0x00625022}
+	// 0x00a63820, // add
+	// 0x8d0f0004, // lw
+	0xad09fffc} // sw
 
 // TODO: swap for assignment instructions
 // var instructions = []int{
@@ -415,7 +413,6 @@ func EX_stage() {
 	// TODO: this needs to be paramaterized
 	// alu_operation_to_perform := alu_control_lines[id_ex_r.Instr_String]
 	result := 0
-	// TODO: add support for lw / sw / sub
 	if id_ex_r.Instr_String == "add" {
 		result = id_ex_r.ReadReg1Value + id_ex_r.ReadReg2Value
 	} else if id_ex_r.Instr_String == "sub" {
@@ -579,7 +576,6 @@ func Do_RFormat(instruction int, showVerbose bool) *R_Inst {
 	}
 
 	inst_string := fmt.Sprintf("%3s  $%d, $%d, $%d", func_code, rd, rs, rt)
-	// fmt.Println(inst_string)
 
 	r := new(R_Inst)
 	r.instruction = instruction
@@ -613,14 +609,6 @@ func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 	}
 
 	inst_string := fmt.Sprintf("%3s  $%d, %d($%d)", op, rt, offset, rs)
-
-	// TODO: remove this before handing in assignment
-	// if op == "lb" || op == "sb" {
-	// fmt.Println(inst_string)
-	// } else {
-	// fmt.Printf("Unknown I_Inst: %3s  $%d,	$%d,	address %X \n", op, rt, rs, offset)
-	// log.Fatal("Leaving.")
-	// }
 
 	i := new(I_Inst)
 	i.instruction = instruction
