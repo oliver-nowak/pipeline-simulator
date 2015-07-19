@@ -19,7 +19,7 @@ const (
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
 	REG_20_16_MASK   int = 0x001F0000 // >> 16
 	REG_15_11_MASK   int = 0x0000F800 // >> 11
-	MAX_CLOCK_CYCLES int = 6
+	MAX_CLOCK_CYCLES int = 2
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
@@ -31,10 +31,10 @@ var pc = -1
 // Instructions //
 /////////////////
 var instructions = []int{
-	0x00a63820,
-	0x8d0f0004}
+	// 0x00a63820,
+	// 0x8d0f0004,
+	0xad09fffc}
 
-// 0xad09fffc,
 // 0x00625022}
 
 // TODO: swap for assignment instructions
@@ -140,7 +140,7 @@ type ID_EX_Base struct {
 	Incr_PC        int
 	ReadReg1Value  int
 	ReadReg2Value  int
-	SEOffset       int
+	SEOffset       int // TODO: how is this presented in the pipeline? as int, or uint?
 	WriteReg_20_16 int
 	WriteReg_15_11 int
 	Function       int
@@ -168,7 +168,7 @@ func (r *ID_EX_Base) dump_ID_EX() {
 	fmt.Printf("MemToReg=%d, RegWrite=%d, [%s] \n", r.MemToReg, r.RegWrite, r.Instr_String)
 
 	fmt.Printf("IncrPC= %d  ReadReg1Value=%X  ReadReg2Value=%X \n", r.Incr_PC, r.ReadReg1Value, r.ReadReg2Value)
-	fmt.Printf("SEOffset=%X  WriteReg_20_16=%X  WriteReg_15_11=%X  Function=%X \n", r.SEOffset, r.WriteReg_20_16, r.WriteReg_15_11, r.Function)
+	fmt.Printf("SEOffset=%X  WriteReg_20_16=%d  WriteReg_15_11=%d  Function=%X \n", r.SEOffset, r.WriteReg_20_16, r.WriteReg_15_11, r.Function)
 }
 
 type EX_MEM_Base struct {
@@ -211,6 +211,7 @@ type MEM_WB_Base struct {
 	MemToReg     int
 	RegWrite     int
 	LWDataValue  int
+	SWDataValue  int
 	ALUResult    int
 	WriteRegNum  int
 	Reg_Type     string
@@ -376,10 +377,17 @@ func ID_stage() {
 		id_ex_w.RegDst = 0
 		id_ex_w.ALUSrc = 1
 		id_ex_w.MemToReg = 1
-		id_ex_w.RegWrite = 1
-		id_ex_w.MemRead = 1
-		id_ex_w.MemWrite = 0
 		id_ex_w.Branch = 0
+
+		if id_ex_w.Instr_String == "lw" {
+			id_ex_w.RegWrite = 1
+			id_ex_w.MemRead = 1
+			id_ex_w.MemWrite = 0
+		} else if id_ex_w.Instr_String == "sw" {
+			id_ex_w.RegWrite = 0
+			id_ex_w.MemRead = 0
+			id_ex_w.MemWrite = 1
+		}
 
 		reg1Value := 0
 		reg2Value := 0
@@ -417,6 +425,8 @@ func EX_stage() {
 	} else if id_ex_r.Instr_String == "lw" {
 		// calculate pointer index via taking reg1value + SEOffset
 		result = id_ex_r.ReadReg1Value + id_ex_r.SEOffset
+	} else if id_ex_r.Instr_String == "sw" {
+		result = id_ex_r.ReadReg1Value + id_ex_r.SEOffset
 	}
 
 	ex_mem_w.ALUResult = result
@@ -440,6 +450,7 @@ func MEM_stage() {
 	mem_wb_w.ALUResult = ex_mem_r.ALUResult
 	mem_wb_w.WriteRegNum = ex_mem_r.WriteRegNum
 	mem_wb_w.Instr_String = ex_mem_r.Instr_String
+	mem_wb_w.SWDataValue = ex_mem_r.SWValue
 
 	if ex_mem_r.Instr_String == "lw" {
 		mem_wb_w.LWDataValue = int(Main_Mem[ex_mem_r.ALUResult])
@@ -455,12 +466,18 @@ func WB_stage() {
 
 	// TODO: how is this calculated in a real pipeline?
 	if mem_wb_r.Instr_String == "add" || mem_wb_r.Instr_String == "sub" {
+		// write ALU result to register
 		reg_val = mem_wb_r.ALUResult
+		Regs[reg_num] = reg_val
 	} else if mem_wb_r.Instr_String == "lw" {
+		// write data from Main_mem to register
 		reg_val = mem_wb_r.LWDataValue
+		Regs[reg_num] = reg_val
+	} else if mem_wb_r.Instr_String == "sw" {
+		// writed data to Main_mem
+		Main_Mem[mem_wb_r.ALUResult] = mem_wb_r.SWDataValue
 	}
 
-	Regs[reg_num] = reg_val
 }
 
 func Print_out_everything(isAfterCopy bool) {
@@ -539,6 +556,7 @@ func CopyMEMWB() {
 	mem_wb_r.ALUResult = mem_wb_w.ALUResult
 	mem_wb_r.WriteRegNum = mem_wb_w.WriteRegNum
 	mem_wb_r.Instr_String = mem_wb_w.Instr_String
+	mem_wb_r.SWDataValue = mem_wb_w.SWDataValue
 }
 
 func Do_RFormat(instruction int, showVerbose bool) *R_Inst {
