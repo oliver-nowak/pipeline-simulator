@@ -19,7 +19,7 @@ const (
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
 	REG_20_16_MASK   int = 0x001F0000 // >> 16
 	REG_15_11_MASK   int = 0x0000F800 // >> 11
-	MAX_CLOCK_CYCLES int = 5
+	MAX_CLOCK_CYCLES int = 6
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
@@ -31,9 +31,9 @@ var pc = -1
 // Instructions //
 /////////////////
 var instructions = []int{
-	0x00a63820}
+	0x00a63820,
+	0x8d0f0004}
 
-// 0x8d0f0004,
 // 0xad09fffc,
 // 0x00625022}
 
@@ -107,11 +107,10 @@ type I_Inst struct {
 }
 
 type IF_ID_Base struct {
-	Instruction        int
-	Code               string
-	Incr_PC            int
-	Reg_Type           string
-	Instruction_String string
+	Instruction int
+	Code        string
+	Incr_PC     int
+	Reg_Type    string
 }
 
 type IF_ID_Write struct {
@@ -126,7 +125,7 @@ func (r *IF_ID_Base) dump_IF_ID() {
 	fmt.Printf("\n")
 	fmt.Printf("IF / ID %s \n", r.Reg_Type)
 	fmt.Println("------------")
-	fmt.Printf("Inst = %.8X     [%s]     IncrPC = %d \n", r.Instruction, r.Instruction_String, r.Incr_PC)
+	fmt.Printf("Inst = %.8X     IncrPC = %d \n", r.Instruction, r.Incr_PC)
 }
 
 type ID_EX_Base struct {
@@ -147,6 +146,7 @@ type ID_EX_Base struct {
 	Function       int
 	Reg_Type       string
 	Instr_String   string
+	Decoded_Inst   string
 }
 
 type ID_EX_Write struct {
@@ -161,7 +161,7 @@ func (r *ID_EX_Base) dump_ID_EX() {
 	fmt.Printf("\n")
 	fmt.Printf("ID / EX %s \n", r.Reg_Type)
 	fmt.Println("------------")
-
+	fmt.Printf("Decoded Instruction: %s\n", r.Decoded_Inst)
 	fmt.Printf("Control: \n")
 	fmt.Printf("RegDst=%d, ALUSrc=%d, ALUOp=%b \n", r.RegDst, r.ALUSrc, r.ALUOp)
 	fmt.Printf("MemRead=%d, MemWrite=%d, Branch=%d \n", r.MemRead, r.MemWrite, r.Branch)
@@ -300,10 +300,19 @@ func Initialize_Pipeline() {
 
 func IF_stage() {
 	fetched_inst := NOP
+	// carry a tmp pointer in case we arent fetching instructions downstream
+	tmp_pc := pc
+
+	// increment the pc
 	pc++
 	// Fetch Instruction
 	if pc < len(instructions) {
 		fetched_inst = instructions[pc]
+	}
+
+	// reset the pc if the inst is a NOP
+	if fetched_inst == NOP {
+		pc = tmp_pc
 	}
 
 	// Copy to IF/ID Write pipeline register
@@ -324,15 +333,18 @@ func ID_stage() {
 	// handle opcode format
 	if ((instruction & OPCODE_MASK) >> 26) == RFORMAT {
 		decoded_inst := Do_RFormat(instruction, showVerbose)
-		fmt.Sprintf(decoded_inst.inst_string)
 
 		// Set these for R_Instructions
+		// see page 266 for control line settings
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
 		id_ex_w.ALUOp = 2
 		id_ex_w.Function = decoded_inst.funct
 		id_ex_w.RegDst = 1
 		id_ex_w.RegWrite = 1
 		id_ex_w.Instr_String = func_codes[decoded_inst.funct]
+		id_ex_w.Decoded_Inst = decoded_inst.inst_string
+		id_ex_w.WriteReg_20_16 = (instruction & REG_20_16_MASK) >> 16
+		id_ex_w.WriteReg_15_11 = (instruction & REG_15_11_MASK) >> 11
 
 		reg1Value := 0
 		reg2Value := 0
@@ -344,9 +356,6 @@ func ID_stage() {
 		id_ex_w.ReadReg1Value = reg1Value
 		id_ex_w.ReadReg2Value = reg2Value
 
-		id_ex_w.WriteReg_20_16 = (instruction & REG_20_16_MASK) >> 16
-		id_ex_w.WriteReg_15_11 = (instruction & REG_15_11_MASK) >> 11
-
 		// These controls are not set
 		id_ex_w.MemRead = 0
 		id_ex_w.MemWrite = 0
@@ -357,26 +366,33 @@ func ID_stage() {
 
 	} else {
 		decoded_inst := Do_IFormat(instruction, showVerbose)
-		fmt.Sprintf(decoded_inst.inst_string)
-
+		// NOTE: see page 260 & 266 & 269 in COD for settings for lw/sw
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
 		id_ex_w.ALUOp = 0 // IFormat instr are 0 for ALUOp
-
-		// NOTE: see page 260 & 266 & 269 in COD for settings for lw/sw
+		id_ex_w.Instr_String = op_codes[decoded_inst.op]
+		id_ex_w.Decoded_Inst = decoded_inst.inst_string
+		id_ex_w.WriteReg_20_16 = (instruction & REG_20_16_MASK) >> 16
+		id_ex_w.WriteReg_15_11 = (instruction & REG_15_11_MASK) >> 11
 		id_ex_w.RegDst = 0
-		id_ex_w.ALUSrc = 0
-		id_ex_w.MemRead = 0
+		id_ex_w.ALUSrc = 1
+		id_ex_w.MemToReg = 1
+		id_ex_w.RegWrite = 1
+		id_ex_w.MemRead = 1
 		id_ex_w.MemWrite = 0
 		id_ex_w.Branch = 0
-		id_ex_w.MemToReg = 0
-		id_ex_w.RegWrite = 0
-		id_ex_w.Instr_String = "ERROR"
-		id_ex_w.ReadReg1Value = 0
-		id_ex_w.ReadReg2Value = 0
-		id_ex_w.SEOffset = 0
-		id_ex_w.WriteReg_20_16 = 0
-		id_ex_w.WriteReg_15_11 = 0
-		id_ex_w.Function = 0
+
+		reg1Value := 0
+		reg2Value := 0
+		if instruction != NOP {
+			reg1Value = Regs[decoded_inst.rs]
+			reg2Value = Regs[decoded_inst.rt]
+		}
+
+		id_ex_w.ReadReg1Value = reg1Value
+		id_ex_w.ReadReg2Value = reg2Value
+		id_ex_w.SEOffset = int(decoded_inst.offset)
+		id_ex_w.Function = 0 // TODO: not read; could probably be commented out to more accurately simulate register
+
 	}
 }
 
@@ -398,6 +414,9 @@ func EX_stage() {
 		result = id_ex_r.ReadReg1Value - id_ex_r.ReadReg2Value
 	} else if id_ex_r.Instr_String == "nop" {
 		result = 0
+	} else if id_ex_r.Instr_String == "lw" {
+		// calculate pointer index via taking reg1value + SEOffset
+		result = id_ex_r.ReadReg1Value + id_ex_r.SEOffset
 	}
 
 	ex_mem_w.ALUResult = result
@@ -410,8 +429,8 @@ func EX_stage() {
 	}
 
 	ex_mem_w.CalcBTA = 0
-	ex_mem_w.Zero = 0                        // TODO: when does this get set?
-	ex_mem_w.SWValue = id_ex_r.ReadReg2Value // TODO: why is this always set to r2?
+	ex_mem_w.Zero = 0 // TODO: when does this get set?
+	ex_mem_w.SWValue = id_ex_r.ReadReg2Value
 }
 
 func MEM_stage() {
@@ -421,12 +440,26 @@ func MEM_stage() {
 	mem_wb_w.ALUResult = ex_mem_r.ALUResult
 	mem_wb_w.WriteRegNum = ex_mem_r.WriteRegNum
 	mem_wb_w.Instr_String = ex_mem_r.Instr_String
-	mem_wb_w.LWDataValue = 0
+
+	if ex_mem_r.Instr_String == "lw" {
+		mem_wb_w.LWDataValue = int(Main_Mem[ex_mem_r.ALUResult])
+	} else {
+		mem_wb_w.LWDataValue = 0
+	}
+
 }
 
 func WB_stage() {
 	reg_num := mem_wb_r.WriteRegNum
-	reg_val := mem_wb_r.ALUResult
+	reg_val := 0
+
+	// TODO: how is this calculated in a real pipeline?
+	if mem_wb_r.Instr_String == "add" || mem_wb_r.Instr_String == "sub" {
+		reg_val = mem_wb_r.ALUResult
+	} else if mem_wb_r.Instr_String == "lw" {
+		reg_val = mem_wb_r.LWDataValue
+	}
+
 	Regs[reg_num] = reg_val
 }
 
@@ -584,7 +617,7 @@ func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 
 func Dump_Memory() {
 	// TODO: dump all memory ?
-	fmt.Printf("Main_Mem[0x101]=[%X]\n", Main_Mem[0x101])
+	fmt.Printf("Main_Mem[0x10C]=[%X]\n", Main_Mem[0x10C])
 }
 
 func Dump_Registers() {
