@@ -31,8 +31,8 @@ var pc = -1
 // Instructions //
 /////////////////
 var instructions = []int{
-	// 0x00a63820, // add
-	// 0x8d0f0004, // lw
+	0x00a63820, // add
+	0x8d0f0004, // lw
 	0xad09fffc} // sw
 
 // TODO: swap for assignment instructions
@@ -472,7 +472,7 @@ func WB_stage() {
 		Regs[reg_num] = reg_val
 	} else if mem_wb_r.Instr_String == "sw" {
 		// writed data to Main_mem
-		Main_Mem[mem_wb_r.ALUResult] = mem_wb_r.SWDataValue
+		Main_Mem[mem_wb_r.ALUResult] = byte(mem_wb_r.SWDataValue)
 	}
 
 }
@@ -530,6 +530,7 @@ func CopyIDEX() {
 	id_ex_r.WriteReg_15_11 = id_ex_w.WriteReg_15_11
 	id_ex_r.Function = id_ex_w.Function
 	id_ex_r.Instr_String = id_ex_w.Instr_String
+	id_ex_r.Decoded_Inst = id_ex_w.Decoded_Inst
 }
 
 func CopyEXMEM() {
@@ -623,7 +624,7 @@ func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 
 func Dump_Memory() {
 	// TODO: dump all memory ?
-	fmt.Printf("Main_Mem[0x10C]=[%X]\n", Main_Mem[0x10C])
+	fmt.Printf("Main_Mem[0x104]=[%X]\n", Main_Mem[0x104])
 }
 
 func Dump_Registers() {
