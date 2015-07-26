@@ -1,0 +1,896 @@
+
+
+Clock Cycle 0 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00000000     IncrPC = 0 
+
+IF / ID Read 
+------------
+Inst = 00000000     IncrPC = 0 
+
+ID / EX Write 
+------------
+Decoded Instruction: 
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+IncrPC= 0  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: 
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+IncrPC= 0  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 10A 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #0---          
+
+
+Clock Cycle 1 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = A1020000     IncrPC = 0 
+
+IF / ID Read 
+------------
+Inst = 00000000     IncrPC = 0 
+
+ID / EX Write 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 0  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: 
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+IncrPC= 0  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 10A 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #1---          
+
+
+Clock Cycle 2 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 810AFFFC     IncrPC = 1 
+
+IF / ID Read 
+------------
+Inst = A1020000     IncrPC = 0 
+
+ID / EX Write 
+------------
+Decoded Instruction:  sb  $2, 0($8)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=0, MemWrite=1, Branch=0 
+MemToReg=1, RegWrite=0, [sb] 
+IncrPC= 0  ReadReg1Value=108  ReadReg2Value=102 
+SEOffset=0  WriteReg_20_16=2  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 0  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 10A 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #2---          
+
+
+Clock Cycle 3 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00831820     IncrPC = 2 
+
+IF / ID Read 
+------------
+Inst = 810AFFFC     IncrPC = 1 
+
+ID / EX Write 
+------------
+Decoded Instruction:  lb  $10, -4($8)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+IncrPC= 1  ReadReg1Value=108  ReadReg2Value=10A 
+SEOffset=-4  WriteReg_20_16=10  WriteReg_15_11=31  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction:  sb  $2, 0($8)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=0, MemWrite=1, Branch=0 
+MemToReg=1, RegWrite=0, [sb] 
+IncrPC= 0  ReadReg1Value=108  ReadReg2Value=102 
+SEOffset=0  WriteReg_20_16=2  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=1, Branch=0 
+MemToReg=1, RegWrite=0, [sb] 
+CalcBTA=0  Zero=0  ALUResult=108 
+SWValue=102  WriteRegNum=2 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [nop] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 10A 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #3---          
+
+
+Clock Cycle 4 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 01263820     IncrPC = 3 
+
+IF / ID Read 
+------------
+Inst = 00831820     IncrPC = 2 
+
+ID / EX Write 
+------------
+Decoded Instruction: add  $3, $4, $3
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+IncrPC= 2  ReadReg1Value=104  ReadReg2Value=103 
+SEOffset=0  WriteReg_20_16=3  WriteReg_15_11=3  Function=20 
+
+ID / EX Read 
+------------
+Decoded Instruction:  lb  $10, -4($8)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+IncrPC= 1  ReadReg1Value=108  ReadReg2Value=10A 
+SEOffset=-4  WriteReg_20_16=10  WriteReg_15_11=31  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+CalcBTA=0  Zero=0  ALUResult=104 
+SWValue=10A  WriteRegNum=10 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=1, Branch=0 
+MemToReg=1, RegWrite=0, [sb] 
+CalcBTA=0  Zero=0  ALUResult=108 
+SWValue=102  WriteRegNum=2 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=1, RegWrite=0, [sb] 
+LWDataValue=0  ALUResult=108  WriteRegNum=2 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [nop] 
+LWDataValue=0  ALUResult=0  WriteRegNum=0 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 10A 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #4---          
+
+
+Clock Cycle 5 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 01224820     IncrPC = 4 
+
+IF / ID Read 
+------------
+Inst = 01263820     IncrPC = 3 
+
+ID / EX Write 
+------------
+Decoded Instruction: add  $7, $9, $6
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+IncrPC= 3  ReadReg1Value=109  ReadReg2Value=106 
+SEOffset=0  WriteReg_20_16=6  WriteReg_15_11=7  Function=20 
+
+ID / EX Read 
+------------
+Decoded Instruction: add  $3, $4, $3
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+IncrPC= 2  ReadReg1Value=104  ReadReg2Value=103 
+SEOffset=0  WriteReg_20_16=3  WriteReg_15_11=3  Function=20 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+CalcBTA=0  Zero=0  ALUResult=207 
+SWValue=103  WriteRegNum=3 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+CalcBTA=0  Zero=0  ALUResult=104 
+SWValue=10A  WriteRegNum=10 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=1, RegWrite=1, [lb] 
+LWDataValue=4  ALUResult=104  WriteRegNum=10 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=1, RegWrite=0, [sb] 
+LWDataValue=0  ALUResult=108  WriteRegNum=2 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 10A 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #5---          
+
+
+Clock Cycle 6 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 81180000     IncrPC = 5 
+
+IF / ID Read 
+------------
+Inst = 01224820     IncrPC = 4 
+
+ID / EX Write 
+------------
+Decoded Instruction: add  $9, $9, $2
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+IncrPC= 4  ReadReg1Value=109  ReadReg2Value=102 
+SEOffset=0  WriteReg_20_16=2  WriteReg_15_11=9  Function=20 
+
+ID / EX Read 
+------------
+Decoded Instruction: add  $7, $9, $6
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+IncrPC= 3  ReadReg1Value=109  ReadReg2Value=106 
+SEOffset=0  WriteReg_20_16=6  WriteReg_15_11=7  Function=20 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+CalcBTA=0  Zero=0  ALUResult=20F 
+SWValue=106  WriteRegNum=7 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+CalcBTA=0  Zero=0  ALUResult=207 
+SWValue=103  WriteRegNum=3 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [add] 
+LWDataValue=4  ALUResult=207  WriteRegNum=3 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=1, RegWrite=1, [lb] 
+LWDataValue=4  ALUResult=104  WriteRegNum=10 
+
+Registers: [100 101 102 103 104 105 106 107 108 109 4 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #6---          
+
+
+Clock Cycle 7 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 81510010     IncrPC = 6 
+
+IF / ID Read 
+------------
+Inst = 81180000     IncrPC = 5 
+
+ID / EX Write 
+------------
+Decoded Instruction:  lb  $24, 0($8)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+IncrPC= 5  ReadReg1Value=108  ReadReg2Value=118 
+SEOffset=0  WriteReg_20_16=24  WriteReg_15_11=0  Function=20 
+
+ID / EX Read 
+------------
+Decoded Instruction: add  $9, $9, $2
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+IncrPC= 4  ReadReg1Value=109  ReadReg2Value=102 
+SEOffset=0  WriteReg_20_16=2  WriteReg_15_11=9  Function=20 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+CalcBTA=0  Zero=0  ALUResult=20B 
+SWValue=102  WriteRegNum=9 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+CalcBTA=0  Zero=0  ALUResult=20F 
+SWValue=106  WriteRegNum=7 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [add] 
+LWDataValue=4  ALUResult=20F  WriteRegNum=7 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [add] 
+LWDataValue=4  ALUResult=207  WriteRegNum=3 
+
+Registers: [100 101 102 207 104 105 106 107 108 109 4 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #7---          
+
+
+Clock Cycle 8 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00624022     IncrPC = 7 
+
+IF / ID Read 
+------------
+Inst = 81510010     IncrPC = 6 
+
+ID / EX Write 
+------------
+Decoded Instruction:  lb  $17, 16($10)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+IncrPC= 6  ReadReg1Value=4  ReadReg2Value=111 
+SEOffset=10  WriteReg_20_16=17  WriteReg_15_11=0  Function=20 
+
+ID / EX Read 
+------------
+Decoded Instruction:  lb  $24, 0($8)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+IncrPC= 5  ReadReg1Value=108  ReadReg2Value=118 
+SEOffset=0  WriteReg_20_16=24  WriteReg_15_11=0  Function=20 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+CalcBTA=0  Zero=0  ALUResult=108 
+SWValue=118  WriteRegNum=24 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [add] 
+CalcBTA=0  Zero=0  ALUResult=20B 
+SWValue=102  WriteRegNum=9 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [add] 
+LWDataValue=4  ALUResult=20B  WriteRegNum=9 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [add] 
+LWDataValue=4  ALUResult=20F  WriteRegNum=7 
+
+Registers: [100 101 102 207 104 105 106 20F 108 109 4 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #8---          
+
+
+Clock Cycle 9 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00000000     IncrPC = 7 
+
+IF / ID Read 
+------------
+Inst = 00624022     IncrPC = 7 
+
+ID / EX Write 
+------------
+Decoded Instruction: sub  $8, $3, $2
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [sub] 
+IncrPC= 7  ReadReg1Value=207  ReadReg2Value=102 
+SEOffset=0  WriteReg_20_16=2  WriteReg_15_11=8  Function=22 
+
+ID / EX Read 
+------------
+Decoded Instruction:  lb  $17, 16($10)
+Control: 
+RegDst=0, ALUSrc=1, ALUOp=0 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+IncrPC= 6  ReadReg1Value=4  ReadReg2Value=111 
+SEOffset=10  WriteReg_20_16=17  WriteReg_15_11=0  Function=20 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+CalcBTA=0  Zero=0  ALUResult=14 
+SWValue=111  WriteRegNum=17 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+CalcBTA=0  Zero=0  ALUResult=108 
+SWValue=118  WriteRegNum=24 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=1, RegWrite=1, [lb] 
+LWDataValue=2  ALUResult=108  WriteRegNum=24 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [add] 
+LWDataValue=4  ALUResult=20B  WriteRegNum=9 
+
+Registers: [100 101 102 207 104 105 106 20F 108 20B 4 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 118 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #9---          
+
+
+Clock Cycle 10 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00000000     IncrPC = 7 
+
+IF / ID Read 
+------------
+Inst = 00000000     IncrPC = 7 
+
+ID / EX Write 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: sub  $8, $3, $2
+Control: 
+RegDst=1, ALUSrc=0, ALUOp=10 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [sub] 
+IncrPC= 7  ReadReg1Value=207  ReadReg2Value=102 
+SEOffset=0  WriteReg_20_16=2  WriteReg_15_11=8  Function=22 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [sub] 
+CalcBTA=0  Zero=0  ALUResult=105 
+SWValue=102  WriteRegNum=8 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=1, MemWrite=0, Branch=0 
+MemToReg=1, RegWrite=1, [lb] 
+CalcBTA=0  Zero=0  ALUResult=14 
+SWValue=111  WriteRegNum=17 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=1, RegWrite=1, [lb] 
+LWDataValue=14  ALUResult=14  WriteRegNum=17 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=1, RegWrite=1, [lb] 
+LWDataValue=2  ALUResult=108  WriteRegNum=24 
+
+Registers: [100 101 102 207 104 105 106 20F 108 20B 4 10B 10C 10D 10E 10F 110 111 112 113 114 115 116 117 2 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #10---          
+
+
+Clock Cycle 11 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00000000     IncrPC = 7 
+
+IF / ID Read 
+------------
+Inst = 00000000     IncrPC = 7 
+
+ID / EX Write 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=1, [sub] 
+CalcBTA=0  Zero=0  ALUResult=105 
+SWValue=102  WriteRegNum=8 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [sub] 
+LWDataValue=14  ALUResult=105  WriteRegNum=8 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=1, RegWrite=1, [lb] 
+LWDataValue=14  ALUResult=14  WriteRegNum=17 
+
+Registers: [100 101 102 207 104 105 106 20F 108 20B 4 10B 10C 10D 10E 10F 110 14 112 113 114 115 116 117 2 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #11---          
+
+
+Clock Cycle 12 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00000000     IncrPC = 7 
+
+IF / ID Read 
+------------
+Inst = 00000000     IncrPC = 7 
+
+ID / EX Write 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [nop] 
+LWDataValue=14  ALUResult=0  WriteRegNum=0 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=1, [sub] 
+LWDataValue=14  ALUResult=105  WriteRegNum=8 
+
+Registers: [100 101 102 207 104 105 106 20F 105 20B 4 10B 10C 10D 10E 10F 110 14 112 113 114 115 116 117 2 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #12---          
+
+
+Clock Cycle 13 [Before]
+------------------------------
+
+IF / ID Write 
+------------
+Inst = 00000000     IncrPC = 7 
+
+IF / ID Read 
+------------
+Inst = 00000000     IncrPC = 7 
+
+ID / EX Write 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+ID / EX Read 
+------------
+Decoded Instruction: nop  $0, $0, $0
+Control: 
+RegDst=0, ALUSrc=0, ALUOp=0 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+IncrPC= 7  ReadReg1Value=0  ReadReg2Value=0 
+SEOffset=0  WriteReg_20_16=0  WriteReg_15_11=0  Function=0 
+
+EX / MEM Write 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+EX / MEM Read 
+------------
+Control: 
+MemRead=0, MemWrite=0, Branch=0 
+MemToReg=0, RegWrite=0, [nop] 
+CalcBTA=0  Zero=0  ALUResult=0 
+SWValue=0  WriteRegNum=0 
+
+MEM / WB Write 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [nop] 
+LWDataValue=14  ALUResult=0  WriteRegNum=0 
+
+MEM / WB Read 
+------------
+Control: 
+MemToReg=0, RegWrite=0, [nop] 
+LWDataValue=14  ALUResult=0  WriteRegNum=0 
+
+Registers: [100 101 102 207 104 105 106 20F 105 20B 4 10B 10C 10D 10E 10F 110 14 112 113 114 115 116 117 2 119 11A 11B 11C 11D 11E 11F]
+
+         --- END CYCLE #13---          
