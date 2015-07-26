@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	// "log"
 )
 
 const (
@@ -19,7 +18,7 @@ const (
 	OFFSET_MASK      int = 0x0000FFFF // >> 00
 	REG_20_16_MASK   int = 0x001F0000 // >> 16
 	REG_15_11_MASK   int = 0x0000F800 // >> 11
-	MAX_CLOCK_CYCLES int = 6
+	MAX_CLOCK_CYCLES int = 13
 )
 
 var Main_Mem = make([]byte, MAX_MEMORY)
@@ -31,24 +30,18 @@ var pc = -1
 // Instructions //
 /////////////////
 var instructions = []int{
-	0x00a63820, // add
-	0x8d0f0004, // lw
-	0xad09fffc} // sw
-
-// TODO: swap for assignment instructions
-// var instructions = []int{
-// 	0xa1020000,
-// 	0x810AFFFC,
-// 	0x00831820,
-// 	0x01263820,
-// 	0x01224820,
-// 	0x81180000,
-// 	0x81510010,
-// 	0x00624022,
-// 	0x00000000,
-// 	0x00000000,
-// 	0x00000000,
-// 	0x00000000}
+	0xa1020000,
+	0x810AFFFC,
+	0x00831820,
+	0x01263820,
+	0x01224820,
+	0x81180000,
+	0x81510010,
+	0x00624022,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000}
 
 ////////////////////////
 // Pipeline Registers //
@@ -62,7 +55,6 @@ var ex_mem_r = new(EX_MEM_Read)
 var mem_wb_w = new(MEM_WB_Write)
 var mem_wb_r = new(MEM_WB_Read)
 
-// TODO: remove inst codes not requested by assignment parameters
 var func_codes = map[int]string{
 	0x0:  "nop",
 	0x20: "add",
@@ -70,14 +62,10 @@ var func_codes = map[int]string{
 
 var op_codes = map[int]string{
 	0x20: "lb",
-	0x23: "lw",
-	0x28: "sb",
-	0x2b: "sw"}
+	0x28: "sb"}
 
 // TODO: do i need this ???
 var alu_control_lines = map[string]int{
-	"lw":  2,
-	"sw":  2,
 	"lb":  2,
 	"sb":  2,
 	"and": 0,
@@ -138,7 +126,7 @@ type ID_EX_Base struct {
 	Incr_PC        int
 	ReadReg1Value  int
 	ReadReg2Value  int
-	SEOffset       int // TODO: how is this presented in the pipeline? as int, or uint?
+	SEOffset       int
 	WriteReg_20_16 int
 	WriteReg_15_11 int
 	Function       int
@@ -241,9 +229,6 @@ func main() {
 	Initialize_Registers()
 	Initialize_Pipeline()
 
-	Dump_Memory()
-	Dump_Registers()
-
 	// dump at Clock-Cycle 0
 	Print_out_everything(false)
 
@@ -257,14 +242,7 @@ func main() {
 		WB_stage()
 		Print_out_everything(false)
 		Copy_write_to_read()
-
-		// check write pipeline registers
-		// TODO: remove this call, and remove param from signature
-		Print_out_everything(true)
 	}
-
-	Dump_Memory()
-	Dump_Registers()
 }
 
 func Initialize_Memory() {
@@ -336,12 +314,10 @@ func ID_stage() {
 		// Set these for R_Instructions
 		// see page 266 for control line settings
 		id_ex_w.Incr_PC = ifid_r.Incr_PC
-		id_ex_w.ALUOp = 2
 		id_ex_w.Function = decoded_inst.funct
-		id_ex_w.RegDst = 1
-		id_ex_w.RegWrite = 1
 		id_ex_w.Instr_String = func_codes[decoded_inst.funct]
 		id_ex_w.Decoded_Inst = decoded_inst.inst_string
+
 		id_ex_w.WriteReg_20_16 = (instruction & REG_20_16_MASK) >> 16
 		id_ex_w.WriteReg_15_11 = (instruction & REG_15_11_MASK) >> 11
 
@@ -350,12 +326,19 @@ func ID_stage() {
 		if instruction != NOP {
 			reg1Value = Regs[decoded_inst.rs]
 			reg2Value = Regs[decoded_inst.rt]
+			id_ex_w.ALUOp = 2
+			id_ex_w.RegDst = 1
+			id_ex_w.RegWrite = 1
+		} else {
+			id_ex_w.ALUOp = 0
+			id_ex_w.RegDst = 0
+			id_ex_w.RegWrite = 0
 		}
 
 		id_ex_w.ReadReg1Value = reg1Value
 		id_ex_w.ReadReg2Value = reg2Value
 
-		// These controls are not set
+		// These controls are set to 0
 		id_ex_w.MemRead = 0
 		id_ex_w.MemWrite = 0
 		id_ex_w.Branch = 0
@@ -377,11 +360,11 @@ func ID_stage() {
 		id_ex_w.MemToReg = 1
 		id_ex_w.Branch = 0
 
-		if id_ex_w.Instr_String == "lw" {
+		if id_ex_w.Instr_String == "lb" {
 			id_ex_w.RegWrite = 1
 			id_ex_w.MemRead = 1
 			id_ex_w.MemWrite = 0
-		} else if id_ex_w.Instr_String == "sw" {
+		} else if id_ex_w.Instr_String == "sb" {
 			id_ex_w.RegWrite = 0
 			id_ex_w.MemRead = 0
 			id_ex_w.MemWrite = 1
@@ -397,7 +380,9 @@ func ID_stage() {
 		id_ex_w.ReadReg1Value = reg1Value
 		id_ex_w.ReadReg2Value = reg2Value
 		id_ex_w.SEOffset = int(decoded_inst.offset)
-		id_ex_w.Function = 0 // TODO: not read; could probably be commented out to more accurately simulate register
+
+		// this control line is not read
+		// id_ex_w.Function = 0
 
 	}
 }
@@ -410,8 +395,6 @@ func EX_stage() {
 	ex_mem_w.RegWrite = id_ex_r.RegWrite
 	ex_mem_w.Instr_String = id_ex_r.Instr_String
 
-	// TODO: this needs to be paramaterized
-	// alu_operation_to_perform := alu_control_lines[id_ex_r.Instr_String]
 	result := 0
 	if id_ex_r.Instr_String == "add" {
 		result = id_ex_r.ReadReg1Value + id_ex_r.ReadReg2Value
@@ -419,10 +402,10 @@ func EX_stage() {
 		result = id_ex_r.ReadReg1Value - id_ex_r.ReadReg2Value
 	} else if id_ex_r.Instr_String == "nop" {
 		result = 0
-	} else if id_ex_r.Instr_String == "lw" {
+	} else if id_ex_r.Instr_String == "lb" {
 		// calculate pointer index via taking reg1value + SEOffset
 		result = id_ex_r.ReadReg1Value + id_ex_r.SEOffset
-	} else if id_ex_r.Instr_String == "sw" {
+	} else if id_ex_r.Instr_String == "sb" {
 		result = id_ex_r.ReadReg1Value + id_ex_r.SEOffset
 	}
 
@@ -431,17 +414,15 @@ func EX_stage() {
 	if id_ex_r.ALUOp == 2 {
 		ex_mem_w.WriteRegNum = id_ex_r.WriteReg_15_11
 	} else if id_ex_r.ALUOp == 0 {
-		// TODO: double-check this is correct usage of ALUOp
 		ex_mem_w.WriteRegNum = id_ex_r.WriteReg_20_16
 	}
 
 	ex_mem_w.CalcBTA = 0
-	ex_mem_w.Zero = 0 // TODO: when does this get set?
+	ex_mem_w.Zero = 0
 	ex_mem_w.SWValue = id_ex_r.ReadReg2Value
 }
 
 func MEM_stage() {
-	// TODO: handle lb | lw here
 	mem_wb_w.MemToReg = ex_mem_r.MemToReg
 	mem_wb_w.RegWrite = ex_mem_r.RegWrite
 	mem_wb_w.ALUResult = ex_mem_r.ALUResult
@@ -449,28 +430,24 @@ func MEM_stage() {
 	mem_wb_w.Instr_String = ex_mem_r.Instr_String
 	mem_wb_w.SWDataValue = ex_mem_r.SWValue
 
-	if ex_mem_r.Instr_String == "lw" {
+	if ex_mem_r.Instr_String == "lb" {
 		mem_wb_w.LWDataValue = int(Main_Mem[ex_mem_r.ALUResult])
-	} else {
-		mem_wb_w.LWDataValue = 0
 	}
-
 }
 
 func WB_stage() {
 	reg_num := mem_wb_r.WriteRegNum
 	reg_val := 0
 
-	// TODO: how is this calculated in a real pipeline?
 	if mem_wb_r.Instr_String == "add" || mem_wb_r.Instr_String == "sub" {
 		// write ALU result to register
 		reg_val = mem_wb_r.ALUResult
 		Regs[reg_num] = reg_val
-	} else if mem_wb_r.Instr_String == "lw" {
+	} else if mem_wb_r.Instr_String == "lb" {
 		// write data from Main_mem to register
 		reg_val = mem_wb_r.LWDataValue
 		Regs[reg_num] = reg_val
-	} else if mem_wb_r.Instr_String == "sw" {
+	} else if mem_wb_r.Instr_String == "sb" {
 		// writed data to Main_mem
 		Main_Mem[mem_wb_r.ALUResult] = byte(mem_wb_r.SWDataValue)
 	}
@@ -498,7 +475,9 @@ func Print_out_everything(isAfterCopy bool) {
 	mem_wb_w.dump_MEM_WB()
 	mem_wb_r.dump_MEM_WB()
 
-	fmt.Println("\n         --- END ---          \n")
+	Dump_Registers()
+
+	fmt.Printf("\n         --- END CYCLE #%d---          \n", clock_cyle)
 }
 
 func Copy_write_to_read() {
@@ -623,10 +602,10 @@ func Do_IFormat(instruction int, showVerbose bool) *I_Inst {
 }
 
 func Dump_Memory() {
-	// TODO: dump all memory ?
+	// TODO: dump all memory ? parameterize ?
 	fmt.Printf("Main_Mem[0x104]=[%X]\n", Main_Mem[0x104])
 }
 
 func Dump_Registers() {
-	fmt.Printf("Registers: %X\n", Regs)
+	fmt.Printf("\nRegisters: %X\n", Regs)
 }
